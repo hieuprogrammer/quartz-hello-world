@@ -16,7 +16,12 @@ public class HelloWorldQuartzSchedulerApplication {
         scheduler.start();
 
         // 4. Schedule the job
-        scheduler.scheduleJob(jobDetail, trigger);
+//        scheduler.scheduleJob(jobDetail, trigger);
+
+        // Scheduling CRON jobs
+        JobDetail cronJobDetail = buildCronJobDetail();
+        Trigger cronJobTrigger = buildCronJobTrigger("0/1 * * ? * * *");
+        scheduler.scheduleJob(cronJobDetail, cronJobTrigger);
     }
 
     private static Trigger buildHelloWorldTrigger() {
@@ -34,5 +39,18 @@ public class HelloWorldQuartzSchedulerApplication {
         return JobBuilder.newJob(HelloWorldJob.class)
                         .withIdentity("helloJob", "group1")
                         .build();
+    }
+
+    private static JobDetail buildCronJobDetail() {
+        return JobBuilder.newJob(HelloWorldJob.class)
+                .withIdentity("cronJob_" + System.currentTimeMillis(), "group1")
+                .build();
+    }
+
+    private static Trigger buildCronJobTrigger(String cronExpression) {
+        return TriggerBuilder.newTrigger()
+                .withIdentity("cronTrigger_" + System.currentTimeMillis(), "group1")
+                .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
+                .build();
     }
 }
